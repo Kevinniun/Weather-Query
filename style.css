@@ -576,33 +576,66 @@ body {
         height: 36px;
     }
 
+    .forecast-container {
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+    }
+
+    .forecast-container::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .forecast-container::-webkit-scrollbar-track {
+        background: #F1F5F9;
+        border-radius: 2px;
+    }
+
+    .forecast-container::-webkit-scrollbar-thumb {
+        background: #CBD5E1;
+        border-radius: 2px;
+    }
+
     .forecast-day {
-        flex-wrap: wrap;
-        gap: 8px;
+        flex-shrink: 0;
+        flex-direction: column;
+        width: 85px;
+        padding: 12px;
+        gap: 4px;
     }
 
     .forecast-day-name {
-        min-width: 40px;
-        font-size: 0.8rem;
+        min-width: auto;
+        font-size: 0.75rem;
+        text-align: center;
     }
 
     .forecast-icon {
-        font-size: 1.25rem;
-        margin: 0;
+        font-size: 1.5rem;
+        margin: 4px 0;
     }
 
     .forecast-high {
-        min-width: 50px;
+        min-width: auto;
         font-size: 0.8rem;
+        text-align: center;
+        margin: 2px 0;
     }
 
     .forecast-low {
-        min-width: 70px;
-        font-size: 0.8rem;
+        min-width: auto;
+        font-size: 0.75rem;
+        text-align: center;
+        margin: 2px 0;
     }
 
     .forecast-1am {
-        min-width: 75px;
-        font-size: 0.75rem;
+        min-width: auto;
+        font-size: 0.65rem;
+        text-align: center;
+        margin: 2px 0;
     }
 }
