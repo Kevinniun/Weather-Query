@@ -575,4 +575,34 @@ body {
         width: 36px;
         height: 36px;
     }
+
+    .forecast-day {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .forecast-day-name {
+        min-width: 40px;
+        font-size: 0.8rem;
+    }
+
+    .forecast-icon {
+        font-size: 1.25rem;
+        margin: 0;
+    }
+
+    .forecast-high {
+        min-width: 50px;
+        font-size: 0.8rem;
+    }
+
+    .forecast-low {
+        min-width: 70px;
+        font-size: 0.8rem;
+    }
+
+    .forecast-1am {
+        min-width: 75px;
+        font-size: 0.75rem;
+    }
 }
