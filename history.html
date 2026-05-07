@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="GBK">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History Weather by Month</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2rem;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+
+        .search-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .month-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .search-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #4a5568;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .result-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .result-city {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .result-date {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .month-summary {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #f7fafc;
+            border-radius: 12px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+
+        .summary-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            font-weight: 600;
+            color: #718096;
+            padding: 8px 0;
+            font-size: 0.85rem;
+        }
+
+        .calendar-day {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .calendar-day:hover {
+            background: #edf2f7;
+            transform: translateY(-2px);
+        }
+
+        .calendar-day.empty {
+            background: transparent;
+            cursor: default;
+        }
+
+        .calendar-day.today {
+            background: #e6fffa;
+            border: 2px solid #38b2ac;
+        }
+
+        .day-number {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1rem;
+        }
+
+        .day-icon {
+            font-size: 1.5rem;
+            margin: 4px 0;
+        }
+
+        .day-temp {
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .temp-high {
+            color: #e53e3e;
+            font-weight: 500;
+        }
+
+        .temp-low {
+            color: #3182ce;
+            font-weight: 500;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #fff;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .month-row {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar-grid {
+                gap: 4px;
+            }
+
+            .calendar-day {
+                min-height: 80px;
+                padding: 8px 4px;
+            }
+
+            .day-number {
+                font-size: 0.85rem;
+            }
+
+            .day-icon {
+                font-size: 1.2rem;
+            }
+
+            .day-temp {
+                font-size: 0.7rem;
+                gap: 4px;
+            }
+
+            .title {
+                font-size: 1.5rem;
+            }
+
+            .month-summary {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">History Weather by Month</h1>
+            <p class="subtitle">View daily weather for any past month</p>
+        </div>
+
+        <div class="search-card">
+            <div class="form-group">
+                <label class="form-label">City</label>
+                <input type="text" id="cityInput" class="form-input" placeholder="Shanghai">
+            </div>
+
+            <div class="form-group month-row">
+                <div>
+                    <label class="form-label">Year</label>
+                    <select id="yearSelect" class="form-input">
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Month</label>
+                    <select id="monthSelect" class="form-input">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="searchBtn" class="search-btn">Search Monthly Weather</button>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <div id="loading" class="loading">
+            <div>Loading...</div>
+        </div>
+
+        <div id="resultCard" class="result-card">
+            <div class="result-header">
+                <div class="result-city" id="resultCity"></div>
+                <div class="result-date" id="resultDate"></div>
+            </div>
+
+            <div class="month-summary">
+                <div class="summary-item">
+                    <div class="summary-label">Month Avg Temp</div>
+                    <div class="summary-value" id="avgTemp"></div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Month High</div>
+                    <div class="summary-value" id="monthHigh"></div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Month Low</div>
+                    <div class="summary-value" id="monthLow"></div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total Rain</div>
+                    <div class="summary-value" id="totalRain"></div>
+                </div>
+            </div>
+
+            <div id="calendarGrid" class="calendar-grid">
+                <div class="calendar-header">Sun</div>
+                <div class="calendar-header">Mon</div>
+                <div class="calendar-header">Tue</div>
+                <div class="calendar-header">Wed</div>
+                <div class="calendar-header">Thu</div>
+                <div class="calendar-header">Fri</div>
+                <div class="calendar-header">Sat</div>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html" class="back-btn">Back to Current Weather</a>
+        </div>
+    </div>
+
+    <script>
+        const cityNameMap = {
+            'Beijing': 'Beijing',
+            'Shanghai': 'Shanghai',
+            'Guangzhou': 'Guangzhou',
+            'Shenzhen': 'Shenzhen',
+            'Tianjin': 'Tianjin',
+            'Changchun': 'Changchun',
+            'Mohe': 'Mohe'
+        };
+
+        const weatherIcons = {
+            0: '&#x2600;',
+            1: '&#x1F324;',
+            2: '&#x26C5;',
+            3: '&#x2601;',
+            45: '&#x1F32B;',
+            48: '&#x1F32B;',
+            51: '&#x1F327;',
+            53: '&#x1F327;',
+            55: '&#x1F327;',
+            61: '&#x1F327;',
+            63: '&#x1F327;',
+            65: '&#x1F327;',
+            71: '&#x2744;',
+            73: '&#x2744;',
+            75: '&#x2744;',
+            80: '&#x1F326;',
+            81: '&#x1F326;',
+            82: '&#x1F326;',
+            95: '&#x26C8;',
+            96: '&#x26C8;',
+            99: '&#x26C8;'
+        };
+
+        function translateCityName(city) {
+            return cityNameMap[city] || city;
+        }
+
+        async function getCityCoords(city) {
+            const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
+            const data = await response.json();
+            if (!data.results || data.results.length === 0) {
+                throw new Error('City not found');
+            }
+            return {
+                lat: data.results[0].latitude,
+                lon: data.results[0].longitude,
+                name: data.results[0].name
+            };
+        }
+
+        async function fetchHistoryWeather(lat, lon, startDate, endDate) {
+            const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${startDate}&end_date=${endDate}&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,weathercode,precipitation_sum&timezone=auto`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Failed to fetch history weather data');
+            }
+            return await response.json();
+        }
+
+        function getDaysInMonth(year, month) {
+            return new Date(year, month, 0).getDate();
+        }
+
+        function getFirstDayOfMonth(year, month) {
+            return new Date(year, month - 1, 1).getDay();
+        }
+
+        async function searchMonthlyWeather() {
+            const city = document.getElementById('cityInput').value.trim();
+            const year = parseInt(document.getElementById('yearSelect').value);
+            const month = parseInt(document.getElementById('monthSelect').value);
+
+            if (!city) {
+                showError('Please enter city name');
+                return;
+            }
+
+            const today = new Date();
+            const selectedDate = new Date(year, month - 1, 1);
+            if (selectedDate > today) {
+                showError('Please select a past month');
+                return;
+            }
+
+            const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+            const daysInMonth = getDaysInMonth(year, month);
+            const endDate = `${year}-${String(month).padStart(2, '0')}-${daysInMonth}`;
+
+            document.getElementById('errorMessage').classList.remove('show');
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultCard').classList.remove('show');
+
+            try {
+                const englishCity = translateCityName(city);
+                const coords = await getCityCoords(englishCity);
+                const weatherData = await fetchHistoryWeather(coords.lat, coords.lon, startDate, endDate);
+
+                displayMonthlyResults(weatherData, coords.name, year, month);
+            } catch (error) {
+                showError(error.message || 'Query failed, please try again later');
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+            }
+        }
+
+        function displayMonthlyResults(data, cityName, year, month) {
+            const daily = data.daily;
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+            let totalTemp = 0;
+            let monthHigh = -Infinity;
+            let monthLow = Infinity;
+            let totalRain = 0;
+
+            for (let i = 0; i < daily.time.length; i++) {
+                totalTemp += daily.temperature_2m_mean[i];
+                monthHigh = Math.max(monthHigh, daily.temperature_2m_max[i]);
+                monthLow = Math.min(monthLow, daily.temperature_2m_min[i]);
+                totalRain += daily.precipitation_sum[i];
+            }
+
+            const avgTemp = totalTemp / daily.time.length;
+
+            document.getElementById('resultCity').textContent = cityName;
+            document.getElementById('resultDate').textContent = `${monthNames[month - 1]} ${year}`;
+            document.getElementById('avgTemp').innerHTML = Math.round(avgTemp) + '&deg;C';
+            document.getElementById('monthHigh').innerHTML = Math.round(monthHigh) + '&deg;C';
+            document.getElementById('monthLow').innerHTML = Math.round(monthLow) + '&deg;C';
+            document.getElementById('totalRain').innerHTML = totalRain.toFixed(1) + ' mm';
+
+            displayCalendar(daily, year, month);
+
+            document.getElementById('resultCard').classList.add('show');
+        }
+
+        function displayCalendar(daily, year, month) {
+            const firstDay = getFirstDayOfMonth(year, month);
+            const daysInMonth = getDaysInMonth(year, month);
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            const calendarGrid = document.getElementById('calendarGrid');
+
+            let html = `
+                <div class="calendar-header">Sun</div>
+                <div class="calendar-header">Mon</div>
+                <div class="calendar-header">Tue</div>
+                <div class="calendar-header">Wed</div>
+                <div class="calendar-header">Thu</div>
+                <div class="calendar-header">Fri</div>
+                <div class="calendar-header">Sat</div>
+            `;
+
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div class="calendar-day empty"></div>';
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dataIndex = day - 1;
+                const isToday = dateStr === todayStr;
+
+                const maxTemp = Math.round(daily.temperature_2m_max[dataIndex]);
+                const minTemp = Math.round(daily.temperature_2m_min[dataIndex]);
+                const weatherCode = daily.weathercode[dataIndex];
+                const icon = weatherIcons[weatherCode] || '&#x1F321;';
+
+                html += `
+                    <div class="calendar-day${isToday ? ' today' : ''}">
+                        <div class="day-number">${day}</div>
+                        <div class="day-icon">${icon}</div>
+                        <div class="day-temp">
+                            <span class="temp-high">${maxTemp}&deg;</span>
+                            <span class="temp-low">${minTemp}&deg;</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            calendarGrid.innerHTML = html;
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorMessage').classList.add('show');
+        }
+
+        document.getElementById('searchBtn').addEventListener('click', searchMonthlyWeather);
+
+        document.getElementById('cityInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                searchMonthlyWeather();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            
+            document.getElementById('yearSelect').value = lastMonth.getFullYear();
+            document.getElementById('monthSelect').value = lastMonth.getMonth() + 1;
+        });
+    </script>
+</body>
+</html>

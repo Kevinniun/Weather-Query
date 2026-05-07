@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Query</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">Weather Query</h1>
+            <p class="subtitle">Enter city name to check weather</p>
+        </header>
+
+        <div class="search-container">
+            <input type="text" id="cityInput" placeholder="Enter city name..." class="search-input" autocomplete="off">
+            <button id="searchBtn" class="search-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+            <div id="suggestions" class="suggestions-list" style="display: none;"></div>
+        </div>
+
+        <div class="city-buttons">
+            <button class="city-btn" data-city="Shanghai">Shanghai</button>
+            <button class="city-btn" data-city="Tianjin">Tianjin</button>
+            <button class="city-btn" data-city="Hong Kong">Hong Kong</button>
+            <button class="city-btn" data-city="Changchun">Changchun</button>
+            <button class="city-btn" data-city="Mohe">Mohe</button>
+        </div>
+
+        <div id="weatherResult" class="weather-card" style="display: none;">
+            <div class="weather-header">
+                <div class="location">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <div class="location-text">
+                        <span id="cityName"></span>
+                        <span id="countryName" class="country-name"></span>
+                    </div>
+                </div>
+                <div id="currentDate"></div>
+            </div>
+
+            <div class="weather-main">
+                <div class="temperature">
+                    <span id="temp"></span>
+                    <span class="temp-unit">&deg;C</span>
+                </div>
+                <div class="weather-icon" id="weatherIcon"></div>
+                <div id="weatherDescription"></div>
+                <div class="temp-range">
+                    <span class="high-temp"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg> <span id="highTemp"></span>&deg;C</span>
+                    <span class="low-temp"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V8l-3 3"></path><circle cx="12" cy="12" r="10"></circle></svg> <span id="lowTemp"></span></span>
+                </div>
+                <div class="next-day-temp">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                    <span>1 AM Tomorrow: <span id="nextDayTemp"></span>&deg;C (<span id="nextDayFeelsLike"></span>&deg;C)</span>
+                </div>
+            </div>
+
+            <div class="weather-details">
+                <div class="detail-item">
+                    <div class="detail-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="detail-info">
+                        <span class="detail-label">Humidity</span>
+                        <span id="humidity"></span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"></path>
+                            <path d="M9.6 4.6A2 2 0 1 1 11 8H2"></path>
+                            <path d="M12.6 19.4A2 2 0 1 0 14 16H2"></path>
+                        </svg>
+                    </div>
+                    <div class="detail-info">
+                        <span class="detail-label">Wind</span>
+                        <span id="windSpeed"></span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 18H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-2"></path>
+                            <polyline points="16 2 16 8 22 8"></polyline>
+                            <line x1="12" y1="22" x2="12" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div class="detail-info">
+                        <span class="detail-label">Pressure</span>
+                        <span id="pressure"></span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 8v4l3 3"></path>
+                            <circle cx="12" cy="12" r="10"></circle>
+                        </svg>
+                    </div>
+                    <div class="detail-info">
+                        <span class="detail-label">Feels Like</span>
+                        <span id="feelsLike"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hourly-forecast-section">
+                <h3 class="forecast-title">48-Hour Forecast</h3>
+                <div class="hourly-scroll-container">
+                    <div class="hourly-forecast" id="hourlyForecast"></div>
+                </div>
+            </div>
+
+            <div class="forecast-section">
+                <h3 class="forecast-title">6-Day Forecast</h3>
+                <div class="forecast-container" id="forecastContainer"></div>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span id="errorText"></span>
+        </div>
+
+        <div class="history-link">
+            <a href="history.html" class="history-btn">&#x1F4DC; History Weather</a>
+        </div>
+
+        <footer class="footer">
+            <p>Data Source: OpenWeatherMap</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
